@@ -17,13 +17,16 @@ public class LaunchObject : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        launched = false;
         rb = GetComponentInChildren<Rigidbody2D>();
+        rb.isKinematic = true;
     }
 
     // Update is called once per frame
     void Update()
     {
         HandleInput();
+        DestructionCalls();
         
     }
 
@@ -39,6 +42,9 @@ public class LaunchObject : MonoBehaviour
 
         //Check for screen release or mouse release
         if(Input.GetMouseButtonUp(0)){
+            rb.isKinematic = false;
+            launched = true;
+
             Launch();
             ResetCharge();
         }
@@ -73,6 +79,11 @@ public class LaunchObject : MonoBehaviour
     public float GetCurrentCharge()
     {
         return currentCharge;
+    }
+
+    void DestructionCalls(){
+        if(rb.transform.position.y < -6f)
+        Destroy(gameObject);
     }
 
 }
