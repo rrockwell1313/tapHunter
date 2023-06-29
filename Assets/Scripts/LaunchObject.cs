@@ -5,22 +5,36 @@ using TMPro;
 
 public class LaunchObject : MonoBehaviour
 {
+    //charge rate is multiplied by time.delta time so its not actually 10 a second.
     public float chargeRate = 10f;
     public float maxCharge = 100f;
 
     private Rigidbody2D rb;
-    private float currentCharge = 0f;
     private Vector2 launchDirection;
-    private bool launched = false;
+    private AmmoManager ammoManager;
+    private CapsuleCollider2D col;
+
+    private bool isLaunched = false;
+    private float currentCharge = 0f;
+
 
 
     // Start is called before the first frame update
     void Start()
-    {
-        launched = false;
-        rb = GetComponentInChildren<Rigidbody2D>();
-        rb.isKinematic = true;
-    }
+{
+    // Assign rb before using it.
+    rb = GetComponentInChildren<Rigidbody2D>();
+    isLaunched = false;
+    rb.isKinematic = true;
+
+    // Assign and set the collider's isTrigger property
+    col = GetComponentInChildren<CapsuleCollider2D>();
+    
+
+    // Assign ammoManager
+    ammoManager = FindObjectOfType<AmmoManager>();
+}
+
 
     // Update is called once per frame
     void Update()
@@ -30,40 +44,63 @@ public class LaunchObject : MonoBehaviour
         
     }
 
-    void HandleInput()
+ void HandleInput()
     {
-        
-        if(Input.GetMouseButton(0))
+        // Check if the object has not been launched yet
+        if (!isLaunched)
         {
-             Debug.Log("Handling input"); 
-            CalculateLaunchDirection();
-            IncreaseCharge();
-        }
+            // Check for screen touch or mouse button held down
+            if (Input.GetMouseButton(0))
+            {
+                Debug.Log("Handling input");
+                CalculateLaunchDirection();
+                IncreaseCharge();
+            }
 
-        //Check for screen release or mouse release
-        if(Input.GetMouseButtonUp(0)){
-            rb.isKinematic = false;
-            launched = true;
+            // Check for screen release or mouse button release
+                if (Input.GetMouseButtonUp(0))
+            {
+                rb.isKinematic = false;
+                isLaunched = true;
 
-            Launch();
-            ResetCharge();
+                Launch();
+                ResetCharge();
+                ammoManager.LoadNextAmmo();
+            }
+
         }
     }
 
-    void CalculateLaunchDirection()
-    {
-        Vector2 touchPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        launchDirection = (touchPos - (Vector2)transform.position).normalized;
-    }
-
- void IncreaseCharge()
+void CalculateLaunchDirection()
 {
+    Vector2 touchPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+    launchDirection = (touchPos - (Vector2)transform.position).normalized;
+
+    // Calculate the angle between the launch direction and the up vector
+    float angle = Mathf.Atan2(launchDirection.y, launchDirection.x) * Mathf.Rad2Deg;
+
+    // Adjust the angle by 90 degrees to account for the arrow's default orientation along the Y-axis
+    angle -= 90f;
+
+    // Set the rotation of the projectile to face the launch direction
+    transform.rotation = Quaternion.Euler(0, 0, angle);
+}
+
+
+
+    void IncreaseCharge()
+{
+    if (currentCharge >= maxCharge)
+    {
+        return;
+    }
+
     currentCharge += chargeRate * Time.deltaTime;
     currentCharge = Mathf.Clamp(currentCharge, 0, maxCharge);
 
     Debug.Log("Current Charge: " + currentCharge);
-
 }
+
 
 
     void ResetCharge()
@@ -83,7 +120,10 @@ public class LaunchObject : MonoBehaviour
 
     void DestructionCalls(){
         if(rb.transform.position.y < -6f)
+        {
+        Debug.Log("Load Next Ammo");
         Destroy(gameObject);
+        }
     }
 
 }
