@@ -21,8 +21,9 @@ public class ArrowBehavior : MonoBehaviour
         
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    void OnCollisionEnter2D(Collision2D collision)
     {
+        Debug.Log(collision);
         // Check if the arrow isn't already stuck to something
         if (!isStuck)
         {

@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
 
 public class LaunchObject : MonoBehaviour
 {
@@ -11,9 +8,9 @@ public class LaunchObject : MonoBehaviour
 
     private Rigidbody2D rb;
     private Vector2 launchDirection;
-    private AmmoManager ammoManager;
+    
     private CapsuleCollider2D col;
-
+    private AmmoManager ammoManager;
     private bool isLaunched = false;
     private float currentCharge = 0f;
 
@@ -24,15 +21,13 @@ public class LaunchObject : MonoBehaviour
 {
     // Assign rb before using it.
     rb = GetComponentInChildren<Rigidbody2D>();
+    ammoManager = FindObjectOfType<AmmoManager>();
     isLaunched = false;
     rb.isKinematic = true;
 
     // Assign and set the collider's isTrigger property
     col = GetComponentInChildren<CapsuleCollider2D>();
     
-
-    // Assign ammoManager
-    ammoManager = FindObjectOfType<AmmoManager>();
 }
 
 
@@ -52,7 +47,6 @@ public class LaunchObject : MonoBehaviour
             // Check for screen touch or mouse button held down
             if (Input.GetMouseButton(0))
             {
-                Debug.Log("Handling input");
                 CalculateLaunchDirection();
                 IncreaseCharge();
             }
@@ -98,7 +92,6 @@ void CalculateLaunchDirection()
     currentCharge += chargeRate * Time.deltaTime;
     currentCharge = Mathf.Clamp(currentCharge, 0, maxCharge);
 
-    Debug.Log("Current Charge: " + currentCharge);
 }
 
 
