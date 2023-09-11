@@ -12,7 +12,6 @@ public class ArrowBehavior : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-
     }
 
     // Update is called once per frame
@@ -23,7 +22,6 @@ public class ArrowBehavior : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        Debug.Log(collision);
         // Check if the arrow isn't already stuck to something
         if (!isStuck)
         {

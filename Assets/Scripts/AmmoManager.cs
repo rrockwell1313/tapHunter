@@ -10,30 +10,52 @@ public class AmmoManager : MonoBehaviour
 
     private int currentAmmo;
 
+void Start()
+{
+    currentAmmo = maxAmmo;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        currentAmmo = maxAmmo;    
-    }
-     void Update()
-    {
-        
-    }
+    // Find the parent object first
+    GameObject spawners = GameObject.Find("Spawners");
 
-    // Update is called once per frame
+    if (spawners != null)
+    {
+        // Find the child object named "Spawn_Reload" under the parent
+        Transform reloadSpawn = spawners.transform.Find("Spawn_Reload");
+
+        if (reloadSpawn != null)
+        {
+            // Assign its Transform to your spawnPoint
+            spawnPoint = reloadSpawn;
+        }
+        else
+        {
+            Debug.LogError("Child object 'Spawn_Reload' not found");
+        }
+    }
+    else
+    {
+        Debug.LogError("Parent object 'Spawners' not found");
+    }
+}
+
     public void LoadNextAmmo()
     {
-        //basically if the ammo is not zero, we are able to create a new projectil.
-        //if we are at 0 then we need to actually reset the function of ammo.
-        if (currentAmmo >  0)
+        if (spawnPoint == null)
         {
+            Debug.LogError("Spawn Point not set!");
+            return;
+        }
+
+        if (currentAmmo > 0)
+        {
+            Debug.Log("Location: " + spawnPoint.position);
             Instantiate(projectilePrefab, spawnPoint.position, Quaternion.identity);
             currentAmmo--;
-        }else {
-            //we need to reset the ammo to 0, but with a timer.
+        }
+        else
+        {
             Debug.Log("Out of ammo!");
-            return;
+            // You can add a timer logic here to reload ammo after a certain time
         }
     }
 

@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class LaunchObject : MonoBehaviour
@@ -8,12 +10,17 @@ public class LaunchObject : MonoBehaviour
 
     private Rigidbody2D rb;
     private Vector2 launchDirection;
+    private Vector2 currentDirection;
     
     private CapsuleCollider2D col;
     private AmmoManager ammoManager;
     private bool isLaunched = false;
     private float currentCharge = 0f;
+    private float previousYPosition;
 
+    private float rotationSpeed = 3f;
+    private bool isRotating = false;
+    private Quaternion targetRotation;
 
 
     // Start is called before the first frame update
@@ -27,6 +34,7 @@ public class LaunchObject : MonoBehaviour
 
     // Assign and set the collider's isTrigger property
     col = GetComponentInChildren<CapsuleCollider2D>();
+    col.isTrigger = true;
     
 }
 
@@ -36,10 +44,11 @@ public class LaunchObject : MonoBehaviour
     {
         HandleInput();
         DestructionCalls();
-        
+        RotateArrowDown();
+        currentDirection = new Vector2(transform.position.x, transform.position.y).normalized;
     }
 
- void HandleInput()
+void HandleInput()
     {
         // Check if the object has not been launched yet
         if (!isLaunched)
@@ -104,7 +113,21 @@ void CalculateLaunchDirection()
     void Launch()
     {
         rb.AddForce(launchDirection * currentCharge, ForceMode2D.Impulse);
+        col.isTrigger = false;
     }
+
+    void RotateArrowDown()
+    {
+        if (currentDirection.y < previousYPosition && isLaunched && !isRotating)
+        {
+            targetRotation = Quaternion.Euler(0, 0, 180);
+            isRotating = true;
+            StartCoroutine(RotateToTarget());
+        }
+
+        previousYPosition = currentDirection.y;
+    }
+
 
     public float GetCurrentCharge()
     {
@@ -118,5 +141,17 @@ void CalculateLaunchDirection()
         Destroy(gameObject);
         }
     }
+
+    IEnumerator RotateToTarget()
+{
+    while (Quaternion.Angle(transform.rotation, targetRotation) > 0.1f)
+    {
+        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+        yield return null;
+    }
+
+    transform.rotation = targetRotation;
+    isRotating = false;
+}
 
 }
